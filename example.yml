@@ -184,6 +184,15 @@ modules:
     icmp:
       preferred_ip_protocol: "ip4"
       source_ip_address: "127.0.0.1"
+  icmp_nonpriv_example:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"
+      # Send echo requests over non-privileged IPPROTO_ICMP sockets (no
+      # CAP_NET_RAW). On Linux, requires the process gid to be within
+      # net.ipv4.ping_group_range.
+      implementation: "icmpengine"
   dns_udp_example:
     prober: dns
     timeout: 5s

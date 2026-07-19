@@ -73,6 +73,7 @@ var (
 	DefaultICMPProbe = ICMPProbe{
 		IPProtocolFallback: true,
 		TTL:                DefaultICMPTTL,
+		Implementation:     "native",
 	}
 
 	// DefaultDNSProbe set default value for DNSProbe
@@ -380,6 +381,10 @@ type ICMPProbe struct {
 	PayloadSize        int    `yaml:"payload_size,omitempty" json:"payload_size,omitempty"`
 	DontFragment       bool   `yaml:"dont_fragment,omitempty" json:"dont_fragment,omitempty"`
 	TTL                int    `yaml:"ttl,omitempty" json:"ttl,omitempty"`
+	// Implementation selects the ICMP prober backend: "native" (the default,
+	// raw/unprivileged-fallback sockets) or "icmpengine" (non-privileged
+	// IPPROTO_ICMP sockets, no CAP_NET_RAW required).
+	Implementation string `yaml:"implementation,omitempty" json:"implementation,omitempty"`
 }
 
 type DNSProbe struct {
@@ -585,6 +590,16 @@ func (s *ICMPProbe) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	if s.TTL > 255 {
 		return errors.New("\"ttl\" cannot exceed 255")
+	}
+
+	if s.Implementation == "" {
+		s.Implementation = "native"
+	}
+	switch s.Implementation {
+	case "native", "icmpengine":
+		// valid
+	default:
+		return fmt.Errorf("icmp \"implementation\" %q is not valid (want \"native\" or \"icmpengine\")", s.Implementation)
 	}
 	return nil
 }

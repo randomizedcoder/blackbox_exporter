@@ -58,6 +58,12 @@ modules:
     timeout: 5s
     icmp:
       preferred_ip_protocol: ip4
+  icmp_engine_test:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4
+      implementation: icmpengine
   dns_test:
     prober: dns
     timeout: 5s

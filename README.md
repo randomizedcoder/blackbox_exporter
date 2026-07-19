@@ -264,6 +264,16 @@ The ICMP probe requires elevated privileges to function:
 * *BSD*: root user is required.
 * *OS X*: No additional privileges are needed.
 
+The ICMP module also supports a non-privileged backend via
+`icmp.implementation: icmpengine` (the
+[icmpengine](https://github.com/randomizedcoder/icmpengine) library), which uses
+IPPROTO_ICMP sockets and needs **no `CAP_NET_RAW`** — on Linux it only requires
+the process gid to be within `net.ipv4.ping_group_range`. It supports
+`payload_size`, `ttl`, `source_ip_address` and `dont_fragment` (the DF bit is set
+via non-privileged path-MTU discovery). See the `<icmp_probe>` section of
+[CONFIGURATION.md](CONFIGURATION.md) for details (it does not emit
+`probe_icmp_reply_hop_limit`).
+
 The UNIX probe requires the process owner to have write permissions (w) to the UNIX socket,
 and access permissions (x) to the directory structure the socket resides in.
 
