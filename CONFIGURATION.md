@@ -391,6 +391,21 @@ validate_additional_rrs:
 # to determine when network routing has changed.
 [ ttl: <int> ]
 
+# ICMP prober backend. "native" (the default) uses raw sockets, falling back to
+# unprivileged sockets where available, and requires root or CAP_NET_RAW when a
+# raw socket is used. "icmpengine" uses the github.com/randomizedcoder/icmpengine
+# library, which sends echo requests over non-privileged IPPROTO_ICMP sockets and
+# needs no CAP_NET_RAW at all — on Linux this instead requires the process gid to
+# be within net.ipv4.ping_group_range (e.g.
+# `sysctl -w net.ipv4.ping_group_range="0 2147483647"`).
+#
+# The "icmpengine" backend supports payload_size, ttl, source_ip_address and
+# dont_fragment (the DF bit is set via path-MTU discovery, so it too is
+# non-privileged; dont_fragment is Linux-only and also applies to IPv6). It does
+# not emit the `probe_icmp_reply_hop_limit` metric. It listens on both IPv4 and
+# IPv6, so both families must be available on the host.
+[ implementation: <string> | default = "native" ]
+
 ```
 
 ### `<grpc_probe>`

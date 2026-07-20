@@ -1,0 +1,16 @@
+modules:
+  # Default raw/unprivileged-fallback ICMP prober.
+  icmp_native:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: false
+  # Non-privileged icmpengine backend (no CAP_NET_RAW).
+  icmp_engine:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: false
+      implementation: icmpengine

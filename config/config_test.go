@@ -113,6 +113,10 @@ func TestLoadBadConfigs(t *testing.T) {
 			want:  "error parsing config file: \"ttl\" cannot exceed 255",
 		},
 		{
+			input: "testdata/invalid-icmp-implementation.yml",
+			want:  "error parsing config file: icmp \"implementation\" \"bogus\" is not valid (want \"native\" or \"icmpengine\")",
+		},
+		{
 			input: "testdata/invalid-tcp-query-response-regexp.yml",
 			want:  `error parsing config file: "Could not compile regular expression" regexp=":["`,
 		},

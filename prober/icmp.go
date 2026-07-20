@@ -58,7 +58,35 @@ func getICMPSequence() uint16 {
 	return icmpSequence
 }
 
+// icmpImplementation is one selectable ICMP prober backend. It has the same
+// shape as ProbeFn so backends compose cleanly; ProbeICMP dispatches to one
+// based on the module's icmp.implementation field.
+type icmpImplementation func(ctx context.Context, target string, module config.Module, registry *prometheus.Registry, logger *slog.Logger) bool
+
+// icmpImplementations is the registry of ICMP prober backends. "native" is the
+// built-in raw/unprivileged-fallback prober; further backends (e.g.
+// "icmpengine") register here so the ICMP prober is one-of-many by design.
+var icmpImplementations = map[string]icmpImplementation{
+	"native":     probeICMPNative,
+	"icmpengine": probeICMPEngine,
+}
+
+// ProbeICMP is the registered ICMP ProbeFn. It selects a backend from
+// module.ICMP.Implementation (defaulting to "native") and dispatches to it.
 func ProbeICMP(ctx context.Context, target string, module config.Module, registry *prometheus.Registry, logger *slog.Logger) (success bool) {
+	impl := module.ICMP.Implementation
+	if impl == "" {
+		impl = "native"
+	}
+	fn, ok := icmpImplementations[impl]
+	if !ok {
+		logger.Error("Unknown ICMP implementation", "implementation", impl)
+		return false
+	}
+	return fn(ctx, target, module, registry, logger)
+}
+
+func probeICMPNative(ctx context.Context, target string, module config.Module, registry *prometheus.Registry, logger *slog.Logger) (success bool) {
 	var (
 		requestType     icmp.Type
 		replyType       icmp.Type
